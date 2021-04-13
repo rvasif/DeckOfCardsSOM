@@ -4,8 +4,8 @@ namespace DeckOfCardsBusinessLogic
 {
     public class Card : IComparable<Card>
     {
-        public CardValue CardValue { get; set; }
-        public Suit Suit { get; set; }
+        public CardValue CardValue { get; private set; }
+        public Suit Suit { get; private set; }
 
         public Card(CardValue cardValue, Suit suit)
         {

@@ -8,30 +8,34 @@ namespace DeckOfCards.Features
     [Binding]
     public class DeckofPlayingCardsSteps
     {
-        private Deck deck;
-        private int totalNumberofCards;
+        private readonly ScenarioContext _scenarioContext;
+        private Deck _deck;
+        private int _totalNumberofCards;
+
+        public DeckofPlayingCardsSteps(ScenarioContext scenarioContext)
+        {
+            _scenarioContext = scenarioContext;
+        }
 
         [Given(@"a deck of cards")]
         public void GivenADeckOfCards()
         {
-            //ScenarioContext.Current.Pending();
-            deck = Deck.CreateFullDeck();
+            _deck = Deck.CreateFullDeck();
         }
         
         [When(@"I count each card")]
         public void WhenICountEachCard()
         {
-            totalNumberofCards = deck.Cards.Count;
+            _totalNumberofCards = _deck.Cards.Count;
         }
         
         [When(@"I check for suits")]
         public void WhenICheckForSuits()
         {
-            foreach (Card card in deck.Cards)
+            foreach (Card card in _deck.Cards)
             {
                 DoesCardHaveAValidSuit(card).Should().BeTrue();
             }
-            //TODO Check for numbe of Suits from a deck of cards.
         }
 
         private bool DoesCardHaveAValidSuit(Card card)
@@ -59,40 +63,55 @@ namespace DeckOfCards.Features
         [Then(@"I have a total of (.*) cards")]
         public void ThenIHaveATotalOfCards(int p0)
         {
-            deck.Cards.Count.Should().Be(p0);
+            _deck.Cards.Count.Should().Be(p0);
         }
-        
+
         [Then(@"I see hearts, clubs, spades, and diamonds")]
         public void ThenISeeHeartsClubsSpadesAndDiamonds()
         {
-
+            foreach (Card card in _deck.Cards)
+            {
+                card.Suit.Should().Match<Suit>(x => x == Suit.Clubs || x == Suit.Diamonds || x == Suit.Hearts || x == Suit.Spades); 
+            }
         }
 
         [Then(@"I have (.*) cards: Ace, (.*), (.*), (.*), (.*), (.*), (.*), (.*), (.*), (.*), Jack, Queen, King")]
         public void ThenIHaveCardsAceJackQueenKing(int p0, int p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8, int p9)
         {
-            //TODO Check Card worth
-            foreach (Card card in deck.Cards)
+            int singleSuitCounter = 0;
+
+            foreach (Card card in _deck.Cards)
             {
-                DoesCardHaveAValidSuit(card).Should().BeTrue();
+                if (card.Suit == Suit.Clubs)
+                {
+                    singleSuitCounter++;
+                }                
             }
+            singleSuitCounter.Should().Be(13);
         }
                        
         [Then(@"the card is worth (.*)")]
         public void ThenTheCardIsWorth(string p0, Table table)
         {
-            //ScenarioContext.Current.Pending();
             foreach (TableRow row in table.Rows)
             {
-                foreach (CardValue cardvalue in (CardValue[])Enum.GetValues(typeof(CardValue)))
+                foreach (Card card in _deck.Cards)
                 {
-                    if (row["<face_value>"] == cardvalue.ToString())
-                    { 
+                    if (row["<face_value>"] == card.CardValue.ToString())
+                    {
+                        row["<point_value>"].Should().Be(1.ToString());
+                    }
 
+                    if (row["<face_value>"] == CardValue.King.ToString())
+                    {
+                        row["<point_value>"].Should().Be(10.ToString());
+                    }
+
+                    if (row["<face_value>"] == CardValue.Jack.ToString())
+                    {
+                        row["<point_value>"].Should().Be(10.ToString());
                     }
                 }
-                //TODO Check Card worth
-                
             }
 
         }
@@ -100,7 +119,11 @@ namespace DeckOfCards.Features
         [Then(@"the face cards are ordered Jack, Queen, King")]
         public void ThenTheFaceCardsAreOrderedJackQueenKing()
         {
-            //ScenarioContext.Current.Pending();
+            Deck deck = Deck.CreateFullDeck();
+            deck.SortFaceCards();
+            deck.Cards[51].CardValue.Should().Be(CardValue.King);
+            deck.Cards[50].CardValue.Should().Be(CardValue.Queen);
+            deck.Cards[49].CardValue.Should().Be(CardValue.Jack);
         }
     }
 }

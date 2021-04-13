@@ -11,12 +11,9 @@ namespace DeckofCardsConsole
     {
         static void Main(string[] args)
         {
-            var deck1 = Deck.CreateFullDeck();
-            var deck2 = Deck.CreateFullDeck();
-            Console.ReadLine();
+            var fisrtDeck = Deck.CreateFullDeck();
+            var secondDeck = Deck.CreateFullDeck();
             Console.WriteLine("Deck of Cards");
-            Console.Write("Press any key");
-            Console.WriteLine("Deck of Cards.....");
         }
     }
 }
